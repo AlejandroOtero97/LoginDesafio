@@ -5,15 +5,18 @@ const webControllers = {
     login: (req, res) => {
         res.sendFile('login.html', { root: './public/views' })
     },
-    logout: (req, res) => {
-        res.sendFile('logout.html', { root: './public/views' })
-    },
-    register: (req, res) => {
-        res.sendFile('register.html', { root: './public/views' })
-    },
     error: (req, res) => {
         res.sendFile('error.html', { root: './public/views' })
-    }
+    },
+    logoutB: (req, res) => {
+        res.sendFile('logout.html', { root: './public/views' })
+    },
+    signup: (req, res) => {
+        res.sendFile('register.html', { root: './public/views' })
+    },
+    info: (req, res) => {
+        res.sendFile('dataStats.html', { root: './public/views' })
+    },
 }
 
 export default webControllers;

@@ -1,15 +1,6 @@
 const socket = io();
 const { denormalize, schema } = normalizr;
-
-socket.on('connectionToServer', async ({ productsData, messagesData }) => {
-    await showData('formProducts', 'partials/products.handlebars', {});
-    await showData('mensajes', 'partials/messages.handlebars', {});
-    await updateProducts(productsData);
-    await updateMessages(messagesData); 
-    getProductsData();
-    getMessagesData();
-    loginSession();
-});
+import { mostrar } from './../js/data.js';
 
 const schemaAuthor = new schema.Entity('author', {}, { idAttribute: 'email' });
 const schemaMessages = new schema.Entity('messages', {
@@ -20,7 +11,17 @@ const denormalizeMessages = (messages) => {
     const messagesDenormalized = denormalize(messages.result, [schemaMessages], messages.entities);
     return messagesDenormalized;
 }
- 
+
+socket.on('connectionToServer', async ({ productsData, messagesData }) => {
+    await mostrar('formProducts', 'partials/products.handlebars', {});
+    await mostrar('mensajes', 'partials/messages.handlebars', {});
+    await updateProducts(productsData);
+    await updateMessages(messagesData);
+    getProductsData();
+    getMessagesData();
+    loginSession();
+});
+
 socket.on('actualizarTabla', ({ productsData }) => {
     updateProducts(productsData);
 });
@@ -30,7 +31,7 @@ socket.on('actualizarMensajes', ({ messagesData }) => {
 })
 
 const loginSession = () => {
-    const session = document.getElementById('titleWelcome');
+    const cartel = document.getElementById('titleWelcome');
     let nombre;
     const options = {
         method: 'GET',
@@ -39,7 +40,7 @@ const loginSession = () => {
     .then(res => res.json())
     .then(data => {
         nombre = data.name;
-        session.innerHTML = `Welcome ${nombre}`;
+        cartel.innerHTML = `Bienvenido ${nombre}`;
     })
     .catch(err => { console.log(err); })
 
@@ -47,7 +48,7 @@ const loginSession = () => {
     boton.addEventListener('click', event => {
         window.location.href = '/logout';
     })
-} 
+}
 
 const updateProducts = async (productsData) => {
     productsData = productsData.map( item => {
@@ -56,15 +57,16 @@ const updateProducts = async (productsData) => {
         return { ...item, id: id, }; 
     });
     let context = { titulo:"Productos", productsData, productsCount: productsData.length > 0, total: productsData.length };
-    showData('tableProducts', 'partials/result.handlebars', context);
+    mostrar('tableProducts', 'partials/result.handlebars', context);
 }
-  
+
 const updateMessages = async (messagesData) => {
-    const mensajesDenormalized = denormalizeMessages(messagesData); 
-    let context = { messagesData: mensajesDenormalized, messagesCount: mensajesDenormalized.length > 0 }
-    await showData('tableMensajes', 'partials/chat.handlebars', context);
+    const mensajesDenormalized = denormalizeMessages(messagesData);
+    const compresion = (JSON.stringify(messagesData).length) * 100 /JSON.stringify(mensajesDenormalized).length;
+    let context = { messagesData: mensajesDenormalized, messagesCount: mensajesDenormalized.length > 0, titulo: `Porcentaje de Compresion: ${compresion.toFixed(2)}%` }
+    await mostrar('tableMensajes', 'partials/chat.handlebars', context);
 }
- 
+
 function getProductsData() {
     const btn = document.getElementById('botonEnviar')
     btn.addEventListener('click', event => {
@@ -117,20 +119,6 @@ function getMessagesData() {
         }
     })
 }
- 
-async function showData(id, template, context) {
-    const divProductos = document.getElementById(id);
-    divProductos.innerHTML = await htmlTemplate(template, context);
-}
- 
-async function htmlTemplate(url, contexto) {
-    return buscarPlantilla(url).then(plantilla => {
-        const generarHtml = Handlebars.compile(plantilla);
-        return generarHtml(contexto)
-    })
-}
 
-async function buscarPlantilla(url) {
-    return fetch(url).then(res => res.text())
-}
+
 

@@ -1,15 +1,15 @@
-import mongoose from "mongoose";
-
-class ContainerMongoose {
-    constructor(collection, url, options) {
-        mongoose.connect(url, options).then(() => {
-            this.collection = mongoose.model(collection.name, collection.schema);
-        })
+class containerMongoose {
+    constructor(collection) {
+        this.collection = collection;
     }
     async save(elem){
-        const saved = new this.collection(elem);
-        await saved.save();
-        return elem;
+        try{
+            const added = new this.collection(elem);
+            await added.save();
+            return added;
+        } catch {
+            throw new Error(`Error al Insertar`)
+        }
     }
     async getById(id){
         try{
@@ -17,12 +17,17 @@ class ContainerMongoose {
             return element;
         }catch
         {
-            throw new Error(`Error: Element not found`)
+            throw new Error(`Error al Leer: Elemento no encontrado`)
         }
     }
     async getAll(){
-        const elements = await this.collection.find().select({ __v: 0 }).lean();
-        return elements;
+        try{
+            const elements = await this.collection.find().select({ __v: 0 }).lean();
+            return elements;
+        } catch {
+            throw new Error('Error al Leer')
+        }
+        
     }
     async updateById(id, elem){
         try{
@@ -30,9 +35,9 @@ class ContainerMongoose {
             return updated;
         }
         catch{
-            throw new Error(`Error: Element not found`)
+            throw new Error(`Error al Actualizar: Elemento no encontrado`)
         }
     }
 }
 
-export default ContainerMongoose;
+export default containerMongoose;

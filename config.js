@@ -1,9 +1,4 @@
-const mongoose = {
-    url: "mongodb+srv://Alejandro:otero@coderhouse.av1btb7.mongodb.net/?retryWrites=true&w=majority",
-    options: {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    },
+const mongooseConfig = {
     collections: {
         products: {
             name: "products",
@@ -27,8 +22,15 @@ const mongoose = {
                 text: { type: String, require: true },
                 dateString: { type: String, require: true }
             }
+        },
+        users: {
+            name: "users",
+            schema: {
+                username: { type: String, require: true },
+                password: { type: String, require: true }
+            }
         }
     }
 }
 
-export default mongoose;
+export { mongooseConfig };

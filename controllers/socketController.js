@@ -1,12 +1,12 @@
 import { normalize, schema } from 'normalizr';
-import ContainerMongoose from '../containers/ContainerMongoose.js';
-import mongoose from '../mongoConfig.js';
+import containerMongoose from '../containers/containerMongoose.js';
+import { productsCollection, messagesCollection } from '../connections/mongoose.js';
 
-const productos = new ContainerMongoose(mongoose.collections.products, mongoose.url, mongoose.options);
-const mensajes = new ContainerMongoose(mongoose.collections.messages, mongoose.url, mongoose.options);
+const productos = new containerMongoose(productsCollection);
+const mensajes = new containerMongoose(messagesCollection);
 
 const schemaAuthor = new schema.Entity('author', {}, { idAttribute: 'email' });
-const schemaMessages = new schema.Entity('messages', {author: schemaAuthor}, { idAttribute: '_id' });
+const schemaMessages = new schema.Entity('messages', { author: schemaAuthor}, { idAttribute: '_id' });
 
 const normalizeMessages = (messages) => {
     const messagesNormalized = normalize(messages, [schemaMessages]);
@@ -14,7 +14,7 @@ const normalizeMessages = (messages) => {
 }
 
 async function socketController(socket, io) {
-    socket.emit('connectionToServer', { 
+    socket.emit('connectionToServer', {
         productsData: await productos.getAll(), 
         messagesData: normalizeMessages(await mensajes.getAll())
     });
@@ -24,8 +24,8 @@ async function socketController(socket, io) {
     })
     socket.on('agregarProducto', async (data) => {
         await productos.save(data);
-        io.sockets.emit('actualizarTabla', { productsData: await productos.getAll() })
+        io.sockets.emit('actualizarTabla', { productsData: await productos.getAll() });
     })
 }
-  
+
 export default socketController;

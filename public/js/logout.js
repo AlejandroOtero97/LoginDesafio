@@ -1,14 +1,12 @@
 const text = document.getElementById('logout');
-
 const options = {
-    method: 'GET',
+    method: 'POST',
 };
-
 fetch('/api/login')
- .then(response => response.json())
- .then(data => {
+.then(response => response.json())
+.then(data => {
     if(data.name)
-    text.innerHTML = `Hasta Luego ${data.name}`;
+    text.innerHTML = `Hasta luego ${data.name}`;
     else
     window.location.href = '/login';
 })
@@ -16,11 +14,6 @@ fetch('/api/login')
 
 setTimeout(function(){
     fetch('/api/logout', options)
-    .then(res => res.json())
-    .then(data => {
-        if(!data.logged){
-            window.location.href = '/login';
-        }
-    })
+    .then(res => window.location.href = '/login')
     .catch(err => { console.log(err); })
-}, 3000);
+}, 2000);
